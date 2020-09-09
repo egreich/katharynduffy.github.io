@@ -1,10 +1,10 @@
 
-# Digital Repeat Photography Networks
+# Digital Repeat Photography Networks & Methods
 
 
 
 
-> Estimated Time: 2 hours
+> Estimated Time: 4 hours
 
 
 **Course participants**: As you review this information, please
@@ -1153,7 +1153,7 @@ gcc_plot = function(gcc, spring, fall){
     y = ~ gcc_90,
     showlegend = FALSE,
     type = 'scatter',
-    mode = 'markers'
+    mode = 'line'
   ) %>%
     add_trace(
       y = ~ smooth_gcc_90,
