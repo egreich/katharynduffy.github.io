@@ -203,7 +203,15 @@ The USA National Phenology Network (USA-NPN) is a USGS funded organization that 
 
 The USA-NPN R library, "rnpn", is primarily a data access service for USA-NPN data products, serving as a wrapper to the [USA-NPN REST based web services](). This guide details how to use the library to access and work with all USA-NPN data types.
 
+```{r, eval=FALSE}
+install.packages("devtools")
+library('devtools')
+devtools::install_github("usa-npn/rnpn")
 
+```
+```{r}
+library('rnpn')
+```
 ### Accessing USA-NPN Observational Data
 
 USA-NPN Observational data are collected on the ground by citizen and professional observers following standardized protocols, using the Nature's Notebook platform. The data are available 2009 to present, and come in four formats or data types: Status & Intensity, Individual Phenometrics, Site Phenometrics and Magnitude Phenometrics. An overview of the differences is provided in the figure below, and each type is detailed in the following sections. For a complete description of the USA-NPN approach and notes for working with each data type see the [Open File Report on USA-NPN Observational Data](https://pubs.usgs.gov/of/2018/1060/ofr20181060.pdf).
@@ -229,12 +237,12 @@ npn_download_[NAME OF DATA TYPE] (
 'Request source' should usually be populated with your full name or the name of the organization you represent. Species_ID is the unique identifier for all the available plants and animals in the USA-NPN database.
 You can create a table of all available species and their ID numbers:
 
-```{r eval=FALSE}
+```{r}
 species <- npn_species()
 ```
 
 Search for a species by common name from the full list:
-```{r eval=FALSE}
+```{r}
 species[species$common_name=="red maple",]
 ```
 
@@ -252,9 +260,7 @@ There's also another required field, "request_source", which is a user-provided,
 #### Find stations at which a species has been observed
 
 You can also now look up which stations have a registered plant for a particular species. In the example below, we use the species ID for red maple, which we were able to find through the npn_species() function, to find all stations with that species.
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(eval = FALSE)
-```
+
 
 ```{r eval=FALSE}
 npn_stations_with_spp (3)
@@ -340,7 +346,7 @@ npn_download_individual_phenometrics(
 To show what this looks like, we can plot the day of year of the first observation of colored leaves in birches (genus Betula) against summer Tmax.
 
 
-```{r}
+```{r, eval=FALSE}
 BetulaLeaf <-read.csv(
   'Betula_data_2015.csv', 
   header = TRUE, 
@@ -368,7 +374,7 @@ Site Phenometrics, derived from Individual Phenometrics, provide summary metrics
 Here's an example of how to query the services for site phenometrics data, for cloned lilacs, breaking leaf buds, 2013. The call is very similar to the call for individual phenometrics data, however, in addition you can supply the quality control filter for the number of days between a yes record and preceding no record (also applies to the last yes and following no), for the observation to be included in the calculations. Typically this is set to 7, 14 or 30, as when downloading data using the USA-NPN Phenology Observation Portal. If you do not set this parameter, it defaults to 30 days. Note that in this example the results are stored in memory,  rather than output as a file.
 
 
-```{r}
+```{r, eval=FALSE}
 LilacLeafPoints2013<-npn_download_site_phenometrics(
   request_source = 'Your Name Here', 
   years = c('2013'),
@@ -385,7 +391,7 @@ In this example we're able to see the date of the first observation of breaking 
 We can now plot our cloned lilac site phenometric onset data by latitude.
 
 
-```{r}
+```{r, eval=FALSE}
 plot(
   mean_first_yes_doy~latitude, 
   data=LilacLeafPoints2013, 
@@ -409,7 +415,7 @@ Magnitude Phenometrics are a suite of eight metrics derived from Status and Inte
 Here's an example of how to query for Magnitude Phenometrics, for the active individuals phenophase for black-capped chickadee data, in 2018. Requirements are similar to other data types. You must additionally specify the time interval by which the data should be summarized. Typically this is weekly, biweekly or monthly, as in the POP and Visualization Tool. The interval chosen in this example is 7 days.
 
 
-```{r}
+```{r, eval=FALSE}
 npn_download_magnitude_phenometrics(
   request_source = 'Your Name Here', 
   years = '2018',
@@ -426,7 +432,7 @@ In this example we're able to see all of the magnitude phenometric fields, inclu
 
 From this dataset we can view the Proportion_Yes_Records (of all the records submitted on this species, what proportion are positive/yes records) by weekly interval:
 
-```{r}
+```{r, eval=FALSE}
 BCC_AI<-read.csv(
   'MPM_BCC_ActInd_2018.csv', 
   header = TRUE, 
@@ -469,7 +475,7 @@ The following sections describe how to parameterize calls for both AGDD and Spri
 
 If you are interested in how many GDDs had accumulated when the red maple in your backyard leafed out, or what day the Spring Index requirements for leaf out were met for your location, you may wish to query the layers for these values, based on location and date. There are two ways to accomplish this, using the npn_get_point_data function which works for all layers and the npn_get_AGDD_point_data function, which only works for AGDD layers and provides a more precise result.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 npn_get_agdd_point_data(
  'gdd:agdd_50f', 
  '38', 
@@ -481,7 +487,7 @@ npn_get_agdd_point_data(
 This returns a value of 7.64098 GDD, base 50F, for the coordinates 38 north, -90 west on February 25th, 2019.
 
 
-```{r eval=FALSE}
+```{r}
 npn_get_point_data(
  'si-x:lilac_bloom_ncep', 
  '30', 
@@ -495,7 +501,7 @@ This returns a value for lilac bloom of day 48, for the coordinates 30 north, -9
 The above mentioned AGDD products use base temperatures of 32F or 50F and are managed through WCS services. There is also a function to get dynamic AGDD calculations based on a user defined base temperature and a number of other parameters.
 
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 custom_agdd_raster <- npn_get_custom_agdd_raster(
  method = 'double-sine',
  climate_data_source = 'NCEP',
@@ -516,7 +522,7 @@ Heat accumulation is commonly used as a way of predicting the timing of phenolog
 
 When querying certain layers, the underlying data is agnostic about the specific year, and in these cases it makes sense to use the day of year to request data, since that will provide a standardized result, (i.e., April 1st is day 91 in some years and day 92 in others). 
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 npn_download_geospatial(
  'gdd:30yr_avg_agdd_50f', 
  95
@@ -525,7 +531,7 @@ npn_download_geospatial(
 
 But if you're looking at a specific year, such as a current year layer, it makes sense to use a specific calendar date (formatted YYYY-MM-DD). It's also possible to save the raster directly to file instead of loading it into memory.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 npn_download_geospatial(
  'gdd:agdd', 
  '2018-05-05',
@@ -535,7 +541,7 @@ npn_download_geospatial(
 
 In the case of the historic Spring Index layers, however, the product represents the overall outcome for the entire year, so while the year component of the date matters, the month and day do not. In this case, specify January 1 as the month and date.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 npn_download_geospatial(
  "si-x:average_bloom_prism",
  "1995-01-01"
@@ -546,14 +552,14 @@ The dimension.range value, returned in the npn_get_layer_details() function, cla
 
 Of course, it's also easy to grab raster data and load it into a visual plot as in this example, showing a map of AGDD base 50 on 2019-06-25:
 
-```{r warning = FALSE, message=FALSE}
+```{r, warning = FALSE, message=FALSE}
 AGDDJun2019<-npn_download_geospatial(
  'gdd:agdd_50f', 
  '2019-06-25'
 )
 ```
 
-```{r}
+```{r, eval=FALSE}
 plot(
  AGDDJun2019, 
  main = "AGDD base 50 on June 25th, 2019"
@@ -562,7 +568,7 @@ plot(
 
 An important layer to know of is the 30 year average for AGDD products. This is useful for many comparative analyses. This layer takes DOY as the date input, since it's the average AGDD value for each day of year for 1981 - 2010.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 average_30yr <- npn_download_geospatial(
  "gdd:30yr_avg_agdd",
  45
@@ -593,7 +599,7 @@ average_model <- npn_download_geospatial(
 
 The Spring Indices are also unique in that the algorithm has been run against the BEST climate data set, so historic data going back to 1880 is available.
 
-```{r warning = FALSE, message=FALSE}
+```{r, warning = FALSE, eval=FALSE}
 BESTSIxData1905 <- npn_download_geospatial(
  'si-x:average_bloom_best', 
  '1905-01-01'
@@ -601,7 +607,7 @@ BESTSIxData1905 <- npn_download_geospatial(
 NAvalue(BESTSIxData1905) <- -9999
 ```
 
-```{r}
+```{r, eval=FALSE}
 plot(
  BESTSIxData1905, 
  main = "Spring Index, 1905"
@@ -616,7 +622,7 @@ Besides the AGDD and Spring Index layers there are a number of other useful laye
 
 The daily temperature minimum and maximum values are the underlying climate data used to generate current year AGDD and Spring Index maps. These data are generated by NOAA's National Centers for Environmental Prediction (NCEP) and are reserved through NPN's geospatial services.
 
-```{r}
+```{r, eval=FALSE}
 daily_max_20190505 <- npn_download_geospatial(
  'climate:tmax', 
  '2019-05-05'
@@ -631,7 +637,7 @@ plot(
 The MODISv6 layers are aggregate values for remote sensing values from the MODISv6 data set, representing a subset of the following phenometrics, aggregated across 2001 - 2017: EVI Area, Mid-Greenup, Mid-Greendown. The available aggregate values for each layer are: median, TSslope, and mean absolute deviation.
 This example shows the median green up value, as DOY. Note that because this layer has a fixed date, the date parameter is input as a blank string.
 
-```{r}
+```{r, eval=FALSE}
 median_greenup <- npn_download_geospatial(
  'inca:midgup_median_nad83_02deg',
  ''
@@ -657,7 +663,7 @@ This example shows several data access calls to assemble observational and gridd
 
 Option 1: You can add a parameter to an observational data call to additionally get a gridded layer value for each observation location/date. Note that if you don't specify which sub model of the Spring Index you want,  you will get the SI-x Average layers.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 npn_download_site_phenometrics(
   request_source = 'Your Name Here', 
   years = '2013',
@@ -741,14 +747,14 @@ legend(
 
 
 ### Basic Utility Functions
-```{r}
+```{r, eval=FALSE}
 species <- npn_species()
 phenophases <- npn_phenophases()
 
 layer_details <- npn_get_layer_details()
 ```
 
-```{r}
+```{r, eval=FALSE}
 quick_get_phenophase <- function(species_id, date,phenophase_name){
   phenophases<-npn_phenophases_by_species(c(species_id),date=date)
   phenophases_species <- phenophases[phenophases$species_id==species_id]$phenophases[[1]]
@@ -762,7 +768,7 @@ quick_get_species <- function(species_name){
 
 ### Download Observational Data
 
-```{r}
+```{r, eval=FALSE}
 white_oak_id <- quick_get_species("white oak")
 fruits_id<- quick_get_phenophase(white_oak_id,"2017-05-15","Fruits")
 
@@ -776,9 +782,9 @@ s2017_white_oak_raw <- npn_download_status_data(
 ```
 
 ### Magnitude Data
-```{r}
+```{r, eval=FALSE}
 m2017_white_oak_magnitude <- npn_download_magnitude_phenometrics(
-  request_source = "R Demo",
+  request_source = "INF550",
   years = c(2017),
   species_ids = c(white_oak_id),
   phenophase_ids = c(fruits_id),
@@ -800,7 +806,7 @@ npn_download_status_data(
 ```
 
 ### Downloading Geospatial Data
-```{r}
+```{r, eval=FALSE}
 SIXBloom2018 <- npn_download_geospatial(
   'si-x:average_bloom_ncep', 
   '2018-12-31'
@@ -819,7 +825,7 @@ my_point <- npn_get_point_data("gdd:agdd_50f", 33.649, -111.861, "2017-05-15")
 ```
 
 ### Putting it together
-```{r}
+```{r, eval=FALSE}
 
 dogwood_id <- quick_get_species("flowering dogwood")
 dogwood_flowering_id <-
@@ -837,10 +843,10 @@ dogwood_data <- npn_download_site_phenometrics(
 
 ### Other Data Sources, e.g. Daymet, MODIS
 
-```{r}
+```{r, eval=FALSE}
 
 add_fields <- npn_download_status_data(
-  request_source = "Demo",
+  request_source = "INF550",
   years = c(2014),
   species_id = c(4),
   additional_fields = c("tmaxf","Greenup_0","MidGreenup_0")
@@ -851,7 +857,7 @@ add_fields <- npn_download_status_data(
 ## USA-NPN Coding Lab
 
 
-```{r}
+```{r, quiet=TRUE, warnings=FALSE, results=FALSE}
 library(rnpn)
 library(ggplot2)
 library(neonUtilities)
@@ -866,7 +872,7 @@ source('/Users/kdw223/Research/katharynduffy.github.io/neon_token_source.R')
 3. Use the `neonUtilities` package to pull plant phenology observations (DP1.10055.001).  We will work with the `statusintensity` data:
 
 Hints:
-```{r}
+```{r, quiet=TRUE, results=FALSE}
 #TOS Phenology Data
 sitesOfInterest <- c("HARV")
 
@@ -887,12 +893,15 @@ summary(phe_statusintensity)
 #remove duplicate records
 phe_statusintensity <- select(phe_statusintensity, -uid)
 phe_statusintensity <- distinct(phe_statusintensity)
+```
 
-#Format dates (native format is 'factor' silly R)
+```{r}
+library(lubridate)
+#Format dates
 phe_statusintensity$date <- as.Date(phe_statusintensity$date, "%Y-%m-%d")
 phe_statusintensity$editedDate <- as.Date(phe_statusintensity$editedDate, "%Y-%m-%d")
-phe_statusintensity$year <- substr(phe_statusintensity$date, 1, 4)
-phe_statusintensity$monthDay <- format(phe_statusintensity$date, format="%m-%d")
+phe_statusintensity$year <- as.numeric(substr(phe_statusintensity$date, 1, 4))
+phe_statusintensity$month <- as.numeric(format(phe_statusintensity$date, format="%m"))
 ```
 
 
@@ -913,9 +922,9 @@ Now create a new, filtered `dataframe` only including those observations and pri
 ```{r libraries, eval=FALSE}
 
 ##load libraries
-library(tidyverse)
+#library(tidyverse)
 library(neonUtilities)
-install.packages('mgcv')
+#install.packages('mgcv')
 library(mgcv)
 
 ```
@@ -937,35 +946,36 @@ df <- tempDat$SAAT_30min
 
 ```
 
-```{r , eval=FALSE}
-
+```{r, eval=FALSE}
 # GDD typically reported in F
-# define function to convert temp c to f 
-c_to_f <- function(x)  (x * 1.8 + 32)
-
 # convert df temps
-df$meanTempF <- c_to_f(df$tempSingleMean)
+df$meanTempF=df$tempSingleMean*1.8+32
 
 #pull date value from dateTime
 df$date <- substr(df$endDateTime, 1, 10)
+```
 
-# group data and summarize values
-# Here, we will group the 30-minute temperature averages by data (to get daily values)
+**Group data and summarize values**
 
-# You will want to consider which vertical position is most appropriate to use for your analysis.
+Here, I will group the 30-minute temperature averages by data (to get daily values)
+
+**You will want to consider which vertical position is most appropriate to use for your analysis.**
   
-# You can view the sensor position data in the sensor_positions table downloaded above,
-# where HOR.VER are the horizontal and vertical position indices (separated by a period),
-# and zOffset is in meters above the ground
+You can view the sensor position data in the sensor_positions table downloaded above, where HOR.VER are the horizontal and vertical position indices (separated by a period),and zOffset is in meters above the ground:
+
+```{r, eval=FALSE}
   select(tempDat$sensor_positions_00002, c(HOR.VER, zOffset))
-  
-# (you can also view all of the sensor position info with the following line:)
-# View(tempDat$sensor_positions_00002)
-  
-# For example, the lowest position sensor (verticalPosition == 010) may be most appropriate for 
-# comparison with the phenological state of very short plants, while the highest verticalPosition
-# may be better for comparison with canopy trees. Selected level 1 for demonstration
-  
+``` 
+
+you can also view all of the sensor position info with the following line:
+
+```{r, eval=FALSE}
+head(tempDat$sensor_positions_00002)
+``` 
+For example, the lowest position sensor (verticalPosition == 010) may be most appropriate for comparison with the phenological state of very short plants, while the highest verticalPosition may be better for comparison with canopy trees. 
+
+Here I'll select level 1 for demonstration
+```{r, eval=FALSE}
 day_temp <- df%>%
   filter(verticalPosition=="010")%>%
   group_by(siteID, date)%>%
@@ -977,12 +987,21 @@ day_temp <- df%>%
 ##alternative, simplified mean, consistent with many GDD calculations 
 ### does accumulation differ for true mean vs. simplified mean?
 day_temp$mean2 <- (day_temp$dayMinTemp + day_temp$dayMaxTemp)/2
+```
 
-#caluculate daily GDD for true mean
-## 50 degrees F is a common base temperature used to calculate plant specific GDD. When might you select a differnt base temp?
+**Caluculate daily GDD for a true mean**
 
-day_temp$GDD <- ifelse(day_temp$dayMeanTemp-50 < 0, 0, round(day_temp$mean2-50, 0))
+*50 degrees F is a common base temperature used to calculate plant specific GDD. When might you select a different base temp?*
 
+*How might you want to deal with different 'means' of temperature?  A couple of options below:*
+```{r, eval=FALSE}
+day_temp$GDD1 <- ifelse(day_temp$dayMeanTemp-50 < 0, 0, round(day_temp$dayMeanTemp-50, 0))
+day_temp$GDD2 <- ifelse(day_temp$mean2-50 < 0, 0, round(day_temp$mean2-50, 0))
+day_temp$GDD3 <- ifelse(day_temp$dayMeanTemp-50 < 0, 0, round(day_temp$mean2-50, 0))
+
+```
+
+```{r, eval=FALSE}
 # define year
 day_temp$year <- substr(day_temp$date, 1, 4)
 
@@ -992,27 +1011,59 @@ sumr.2 <- function(x) {
 }
 
 #calculate Accumlated GDD
-day_temp$AGDD <- sumr.2(x=day_temp$GDD)
-
+day_temp$AGDD3 <- sumr.2(x=day_temp$GDD3)
+day_temp$AGDD2 <- sumr.2(x=day_temp$GDD2)
+day_temp$AGDD1 <- sumr.2(x=day_temp$GDD1)
 day_temp <- ungroup(day_temp)
 
 ```
 
 
+```{r, eval=FALSE}
+library(plotly)
+
+
+p = plot_ly() %>%
+    add_trace(
+      x= ~day_temp$date,
+      y = ~ day_temp$AGDD1,
+      type= 'scatter',
+      mode = "lines",
+      line = list(width = 1, color = "rgb(120,120,120)"),
+      name = "Calculated Mean Temp",
+      showlegend = TRUE, 
+      opacity=.5
+    )%>%
+  add_trace(
+      data = day_temp,
+    x = ~ date,
+    y = ~ AGDD2,
+    name= 'Simplified Mean Temp',
+    showlegend = TRUE,
+    type = 'scatter',
+    mode = 'lines',
+    line = list(width = 1),
+    opacity=.5)%>%
+  add_trace(
+      data = day_temp,
+    x = ~ date,
+    y = ~ AGDD3,
+    name= 'Filtered Using Both',
+    showlegend = TRUE,
+    type = 'scatter',
+    mode = 'lines',
+    line = list(width = 1),
+    opacity=.2)
+p
+```
+
 5.  Plot your calculated AGGD and comment on your calculations.  Do you need to revise your time horizon or sensor height?
 
-Hint:
-```
-ggplot(data=data, aes(x=date, y=AGDD, group=1)) +
-  geom_point()+
-  geom_smooth()
-```
-Your plot should resemble *something* like this (intentionally a little vague):
-```{r, echo=FALSE}
-knitr::include_graphics('/Users/kdw223/Research/katharynduffy.github.io/images/Screen Shot 2020-08-31 at 8.15.42 AM.png')
-```
 
-6. Now we're going to build a model to see how AGGD impacts phenological status.  But Wait.  Is phenology **all** driven by temperature?  Should you consider any other variables?  What about AGGD **and** just plain temperature?   Also, we have one very temperate site, and another that is a semi-arid grassland.  Should water availability of any sort be considered?  Create a [GAM (Generalized Additive Model)](https://dereksonderegger.github.io/578/7-beyond-linearity.html#gams) for your phenological data including any variables you think might be relevant.  
+
+6. Now we're going to build a model to see how AGGD impacts phenological status.  But Wait.  Is phenology **all** driven by temperature?  Should you consider any other variables?  What about AGGD **and** just plain temperature?   Also, we have one very temperate site, and another that is a semi-arid grassland.  Should water availability of any sort be considered?  Any other variables or data?
+
+Create a [GAM (Generalized Additive Model)](https://dereksonderegger.github.io/578/7-beyond-linearity.html#gams) for your phenological data including any variables you think might be relevant.  
 
 One of the bonuses of a GAM is that it will tell you which variables are relevant and which aren't so you can iterate a bit on your model and revise it.  You might want to test a few positions on your asipirated air temperature, or a few other additional variables.  Your selection is up to you, but you must document and justify your decision.
 
@@ -1053,9 +1104,73 @@ Hints:
 
 > Please watch the recorded lecture with Dr. Katie Jones, lead plant ecologist with NEON Battelle
 
+## Understanding Observation Biases and Censoring in Citizen Science Data
+
+> The following information was adapted from Zachmann et al. (in prep) and is not to be distributed or used beyond this course.
+
+One significant barrier to advancing our understanding and utilization of phenology information is wrapped up in the ability of existing models to represent drivers of phenology and phenological shifts appropriately. 
+
+```{r, echo=FALSE}
+knitr::include_graphics('./docs/images/700phenology.jpg')
+```
+
+The specific timing of phenological events, such as first leaf or first flower in plants, is affected by multiple, potentially interacting climatic and geophysical factors. For example, soil moisture supply, atmospheric demand for water, frost events, day length, and terrain have all been shown to influence species’ phenology. **Many of these factors vary over time as well as space.** Additionally, some of their *effects may themselves* vary over time as a result of interactions among controls on phenology. 
+
+**For instance:**
+
+* Precipitation and temperature likely interact to initiate phenological events; 
+
+* Precipitation triggers a state change only after enough heat has accumulated at a given site over the course of the growing season.
+
+Phenological predictions, specifically, consist of estimates of the anticipated onset dates of key events: *bud break and the arrival of spring, for example,  or plant senescence in the fall*. 
+
+In order to track anomalies in real-time, we need forecasts of phenology.  Further, we need forecasts of long-term shifts in phenology as a result of climate change. However, making any such predictions requires both **reasonable** *and* **skillful** models of phenology. 
+
+>By “reasonable” we refer to models that are appropriate for the data – including any “nonignorable” aspects of the sampling design, Gelman et al. (2013) – and the underlying ecological process, while by “skillful” we mean that the model has adequate predictive performance. 
+
+### Many existing modeling approaches fail in one (or both) regards.
+
+Much of the existing work relies on models that implicitly or explicitly ignore key characteristics of phenological data and the ecological process of phenology. For example, many studies ignore censoring and other aspects of the sampling design underlying observations, including the location and nestedness of sampling units, or incompletely account for the dynamic nature of phenological drivers. Efforts that fail to account for these features of the data are liable to misrepresent the ecological process, thereby making predictions that are demonstrably wrong and potentially biased. Though it can be argued that some information is better than no information, scientific understanding and consequential management actions require the right information. In other words, **it is better to be ignorant than misled.**
+
+### Censoring
+
+Time-to-event data are rarely recorded accurately, in which case observations are said to be censored. There are several types of censoring we must consider. In the context of plant phenology, perhaps the most common is **interval censoring**, which occurs when a **phenological event transpires between visits to a site**. 
+
+```{r, echo=FALSE}
+knitr::include_graphics('./docs/images/cens1.png')
+```
+
+> Illustration of the types of censoring that are relevant to analyses of phenological data. Although shown extending from zero to positive infinity, the x-axis for most phenological events spans the length of a growing season and starts on Jan. 1. The timing, ti, of the event (e.g., first leaf), in relation to interval boundaries li and ri, is indicated by the position of the leaf along the x- axis, while actual site visits are represented by the presence of the person. Note that - in the case of right-censoring – the event need not occur, hence the question mark. Phenological observations are almost never observed exactly, as depicted on the bottom-most timeline for uncensored observations. (Zachmann et al, in prep)
+
+Taking first leaf as an example, a deciduous shrub at site i might be completely leafless at the time of the first visit, li, but could have several emerging leaves at time of the second visit ri. The size of the interval depends on how frequently the site is visited, and may span days or weeks. All that is known is that the event of interest happened in (li,ri), rather than an exact time. 
+
+Censoring is often ignored in analysis, or it is addressed, potentially inappropriately, using imputation techniques. When the intervals are small relative to the full timespan of interest, the bias introduced by interval censored observations may be small enough to be safely ignored. Either such assumptions must be tested or statistical methods that account for this feature of the sampling design must be used.
+
+## So then how can we model censored data?
+
+```{r, echo=FALSE}
+knitr::include_graphics('./docs/images/cens2.png')
+```
+
+>An extension of the ontology developed above, this figure shows a simulated set of observations for eight sites chosen at random from the N = 100 sites used to develop the concept figures. Three types of censoring can be seen in this figure. Not all phenological observations are created equally, nor systematically! (Zachmann et al, in prep)
+
+
+For logistical or other reasons, record-keeping at some sites starts earlier than others. Additionally, some of the observers make visits to sites more frequently than others. Analyses that do not account for this sampling process explicitly are somewhat impaired — they must filter the observations for known events (times represented by visits shown in purple) and must discard others (e.g., the data for sites 30 and 77), or must impute times using single-point imputation techniques, which have been shown to lead to invalid inference.
+
+```{r, echo=FALSE}
+knitr::include_graphics('./docs/images/cens3.png')
+```
+
+>The histogram seen in the upper panel is constructed on the basis of the true, unobserved leaf out dates. Metaphorically speaking, it is the pile of leaves that would be formed if each leaf (in addition to the other 92 sites not shown) were to fall straight to the bottom of the plot. The histogram on the bottom (in purple) is created using actual first leaf observations (the event dates corresponding to the purple “botanists” above). (Zachmann et al, in prep)
+
+
+Here the authors seek to model the latent distribution of event times (the green line overlaying the histogram in the upper panel) that gives rise to the observations seen in the lower panel. As they begin to introduce both greater complexity, realism, and utility, they can model the moments (or parameters) of the latent distribution using well-established deterministic models involving climatic and other phenological forcings.
+
 ## **Intro to USA-NPN Culmination Activity**
 
-*Note: I fully realize that phenology data may not be relevant to all of you.  Two suggestions:*
+**Note: I fully realize that phenology data may not be relevant to all of you.**  
+
+*Two suggestions:*
 
 *1. Be creative, example: Say you work with ground water hydrology, how could leaves on trees perhaps be relevant to groundwater recharge rate?  Might there be a lag?  Etc etc.*
 
