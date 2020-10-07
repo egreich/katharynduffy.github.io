@@ -519,18 +519,15 @@ image. However, look at the images below. The top one is what our log adjusted
 image looks like when plotted. The bottom on is an RGB version of the same image. 
 Notice a difference? 
 
-![](https://raw.githubusercontent.com/NEONScience/NEON-Data-Skills/dev-aten/graphics/hyperspectral-general/RGBImage_2.png)
 
-">
-    <img src="https://raw.githubusercontent.com/NEONScience/NEON-Data-Skills/dev-aten/graphics/hyperspectral-general/RGBImage_2.png"
+<img src="https://raw.githubusercontent.com/NEONScience/NEON-Data-Skills/dev-aten/graphics/hyperspectral-general/RGBImage_2.png"
     alt="RGB image of the SJER field site. At the top right of the image, there is dark, brakish water. Scattered throughout the image, there are several trees. At the center of the image, there is a baseball field, with low grass. At the bottom left of the image, there is a parking lot and some buildings with highly reflective surfaces, and adjacent to it is a section of a gravel lot.">
     </a>
     <a href="https://raw.githubusercontent.com/NEONScience/NEON-Data-Skills/dev-aten/graphics/hyperspectral-general/SJER_Flipped.png">
     <img src="https://raw.githubusercontent.com/NEONScience/NEON-Data-Skills/dev-aten/graphics/hyperspectral-general/SJER_Flipped.png"
     alt="Plot of log transformed reflectance values for the b9 image previously plotted. Applying the log to the image increases the contrast making it look more like an image by factoring out those larger values. While an improvement, the image is still far from great. The proper way to adjust an image is by doing whats called an image stretch. The log transformed image appears flipped because when R reads in the dataset, it reads them as: Columns x Bands x Rows, as opposed to the RGB image on the left which has dimensions as Bands x Rows x Columns.">
     </a>
-    <figcaption>LEFT: The image as it should look. RIGHT: the image that we outputted from the code above. Notice a difference?</figcaption>
-</figure>
+    <figcaption>TOP: The image as it should look. BOTTOM: the image that we outputted from the code above. Notice a difference?</figcaption>
 
 
 ### Transpose Image
@@ -733,15 +730,14 @@ AOP point clouds for 1km tiles from the <a href="https://www.neonscience.org/fie
 
 <a href="https://drive.google.com/open?id=1Aemh0IVKvC-LoMj2AXr9k8rDQk77l8k7" target="_blank"> **Link to download .laz files on Google Drive Here.**</a>
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/EYbhNSUnIdU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### Recommended Skills
 
 For this tutorial, you should have an understanding of Light Detection 
 And Ranging (LiDAR) technology, specifically how discrete return lidar 
 data are collected and represented in las/laz files. For more information 
-on how lidar works, please see this 
-<a href="https://www.youtube.com/watch?v=EYbhNSUnIdU" target="_blank"> primer video </a>
-and
+on how lidar works, please see NEON's
 <a href="https://www.neonscience.org/intro-lidar-r-series" target="_blank"> Introduction to Lidar Tutorial Series.</a>
 
 </div> 
@@ -1048,8 +1044,10 @@ deepgap.fraction <- deepgaps/cells
 
 #cover fraction, the inverse of deep gap fraction
 cover.fraction <- 1 - deepgap.fraction 
-
-#HEIGHT SD
+```
+#### HEIGHT SD
+The standard deviation of height values for all points in the plot point cloud
+```{r, eval=FALSE}
 #height SD, the standard deviation of height values for all points
 #in the plot point cloud
 vert.sd <- cloud_metrics(data.40m, sd(Z, na.rm = TRUE)) 
@@ -1069,17 +1067,19 @@ sd.sd <- sd(sd.1m2[,3], na.rm = TRUE)
 #to filter these out of a vector of Z points
 Zs <- data.40m@data$Z
 Zs <- Zs[!is.na(Zs)]
-
-#ENTROPY 
-#entropy, quantifies diversity & evenness of point cloud heights 
+```
+#### ENTROPY
+Quantifies diversity & evenness of point cloud heights
+```{r, eval=FALSE}
 #by = 1 partitions point cloud in 1 m tall horizontal slices 
 #ranges from 0-1, with 1 being more evenly distributed points 
 #across the 1 m tall slices 
 entro <- entropy(Zs, by = 1) 
+```
 
-#GAP FRACTION PROFILE 
-#gap fraction profile, assesses the distribution of gaps in the 
-#canopy volume 
+#### GAP FRACTION PROFILE 
+Gap fraction profile, assesses the distribution of gaps in the canopy volume
+```{r, eval=FALSE}
 #dz = 1 partitions point cloud in 1 m horizontal slices 
 #z0 is set to a reasonable height based on the age and height of 
 #the study sites 
@@ -1087,9 +1087,12 @@ gap_frac <- gap_fraction_profile(Zs, dz = 1, z0=3)
 #defines gap fraction profile as the average gap fraction in each 
 #1 m horizontal slice assessed in the previous line
 GFP.AOP <- mean(gap_frac$gf) 
+```
 
-#VAI
-#leaf area density, assesses leaf area in the canopy volume 
+#### VAI
+Leaf area density, assesses leaf area in the canopy volume
+```{r, eval=FALSE}
+ 
 #k = 0.5 is a standard extinction coefficient for foliage 
 #dz = 1 partitions point cloud in 1 m horizontal slices 
 #z0 is set to the same height as gap fraction profile above
@@ -1263,16 +1266,19 @@ Prior to starting the tutorial ensure that the following packages are installed.
 
 ### Example Data Set
 
-############# Possibly add GEDI subset here?? ##############
+#### GEDI Example Data Subset
+This dataset has been subset from a full GEDI orbit retaining only the 'shots' that correspond to a single 1km AOP tile, and only the 'datasets' (attributes) that are needed to visualize the GEDI waveform as shown below.
+<a href="https://ndownloader.figshare.com/files/24978809" class="link--button link--arrow">
+Download GEDI Example Dataset</a>
 
 #### Datum difference between WGS84 and NAD83
 This dataset describes the differences between two common standards for vertical data in North America.
 <a href="https://neondata.sharefile.com/d-sf4e35e969fc43aca" class="link--button link--arrow">
-Download Dataset</a>
+Download Datum Difference Dataset</a>
 
 
 ### Getting Started
-In this tutorial, we will compare NEON and GEDI LiDAR data by comparing the information that they both capture in the same location. NEON data are actually one of the datasets used by the GEDI mission to calibrate and validate GEDI waveforms, so this makes for a valuable comparison! 
+In this section we will compare NEON and GEDI LiDAR data by comparing the information that they both capture in the same location. NEON data are actually one of the datasets used by the GEDI mission to calibrate and validate GEDI waveforms, so this makes for a valuable comparison! 
 
 In order to compare these data, we will need to download GEDI data that overlap a NEON site. Fortunately, Carlos Silva et al. have made a convenient R package clled `rGEDI` and <a href="https://cran.r-project.org/web/packages/rGEDI/vignettes/tutorial.html">this excellent tutorial hosted on CRAN</a> desribing how to work with GEDI data in R. 
 
@@ -1318,11 +1324,12 @@ plot(chm)
 As you can see, this particular CHM is showing a conspicuous, triangle-shaped clearcut in this section of the experimental forest, where the tree canopy is much shorter than the towering 60m+ trees in the undisturbed areas. This variation will give us a variety of forest structures to investigate.
 
 ### Downloading GEDI data
-This next section on downloading and working with GEDI data is loosely based on the excellent `rGEDI` package tutorial <a href="https://cran.r-project.org/web/packages/rGEDI/vignettes/tutorial.html">posted on CRAN here</a>.
+This next section on downloading and working with GEDI data is loosely based on the excellent `rGEDI` package tutorial <a href="https://cran.r-project.org/web/packages/rGEDI/vignettes/tutorial.html">posted on CRAN here</a>. If you would prefer to avoid a large download (>7Gb) of a full GEDI orbit, you can forego these steps and use the <a href="https://ndownloader.figshare.com/files/24978809">
+example GEDI dataset here</a>, and skip to the `readLevel1B()` function below.
 
 The Global Ecosystem Dynamics Investigation (GEDI) is a NASA mission with the primary data collection being performed by a novel waveform lidar instrument mounted on the International Space Station (ISS). Please see <a href="https://www.sciencedirect.com/science/article/pii/S2666017220300018">this open-access paper</a> published in Science of Remote Sensing that describes this mission in detail. The ISS orbits around the world every 90 minutes, and can be tracked <a href="https://spotthestation.nasa.gov/tracking_map.cfm">on this cool NASA website</a>. 
 
-As described <a href="https://lpdaac.usgs.gov/data/get-started-data/collection-overview/missions/gedi-overview/">here</a> on the Land Processes Distributed Active Archive Center (LP DAAC), "the sole GEDI observable is the waveform from which all other data products are derived. Each waveform is captured with a nominal ~30 m diameter."GEDI has six   As of the date of publication, GEDI data are only offered in HDF5 format, with each file containing the data for a full orbit. The LP DAAC has developed a tool that allows researchers to input a bounding box, which will return a list of every orbit that has a "shot" (waveform return) that falls within that box. Unfortunately, at this time, the tool will not subset out the specific shots that fall within that bounding box; you must download the entire orbit (~7Gb). This functionality may be improved in the future.
+As described <a href="https://lpdaac.usgs.gov/data/get-started-data/collection-overview/missions/gedi-overview/">here</a> on the Land Processes Distributed Active Archive Center (LP DAAC), "the sole GEDI observable is the waveform from which all other data products are derived. Each waveform is captured with a nominal ~30 m diameter." As of the date of publication, GEDI data are only offered in HDF5 format, with each file containing the data for a full orbit. The LP DAAC has developed a tool that allows researchers to input a bounding box, which will return a list of every orbit that has a "shot" (waveform return) that falls within that box. Unfortunately, at this time, the tool will not subset out the specific shots that fall within that bounding box; you must download the entire orbit (~7Gb). This functionality may be improved in the future.
 
 Our next few steps involve defining our bounding box, requesting the list of GEDI orbits that contain data relevant to that bounding box, and downloading those data. Let's focus on the extent of our CHM that we downloaded above - but we will first need to re-project the CHM from its UTM projection into WGS84. To do so, we will refer to the EPSG code for WGS84. To look up any of these codes, please see the amazing resource <a href="https://spatialreference.org/ref/epsg/4326/">spatialrerference.org</a>.
 
@@ -1366,6 +1373,9 @@ Great! There are several GEDI orbits available that have at least 1 'shot' withi
 ```{r download-GEDI, eval=F, comment=NA}
 
 # Downloading GEDI data, if you haven't already
+# Note that this will download a large file (>7Gb) which
+# can be avoided by using the example dataset provided above.
+# wd='./data/'
 # if(!file.exists(paste0(wd,basename(gLevel1B[2])))){
 #   gediDownload(filepath=gLevel1B[2],outdir=wd)
 # }
@@ -1376,7 +1386,7 @@ Next, we use the rGEDI package to read in the GEDI data. First, we need to make 
 
 ```{r read-GEDI, message=F}
 
-gedilevel1b<-readLevel1B(level1Bpath = file.path('./data/NEON_GEDI_subset.h5'))
+gedilevel1b<-readLevel1B(level1Bpath = file.path('./data/NEON_WREF_GEDI_subset.h5'))
 #gedilevel1b<-readLevel1B(level1Bpath = file.path(wd, "GEDI01_B_2019206022612_O03482_T00370_02_003_01.h5"))
 level1bGeo<-getLevel1BGeo(level1b=gedilevel1b,select=c("elevation_bin0"))
 head(level1bGeo)
@@ -1405,7 +1415,7 @@ level1bgeo_WREF=st_crop(level1bGeo_spdf, chm_WGS)
 
 Next, project the GEDI geospatial data into the UTM zone that the CHM is within (Zone 10 North). These data come as the point location at the center of the GEDI footprint, so we next convert the GEDI footprint center (lat/long) into a circle using the `buffer()` function. Finally, we can plot the CHM and overlay the GEDI footprint circles, and label with the last three digits of the 'shot' number.
 
-```{r overly-GEDI-on-chm, warning=F, fig.height=4, fig.width=5}
+```{r overly-GEDI-on-chm, warning=F, fig.height=6, fig.width=8}
 
 # project to UTM
 level1bgeo_WREF_UTM=st_transform(
@@ -1427,13 +1437,14 @@ pointLabel(st_coordinates(level1bgeo_WREF_UTM),
 ```
 
 ### Extract Waveform for a single Shot
-Let's take a look at a waveform for a single GEDI shot. We will use the last three numbers of the shot, shown a labels in the plot above, to select a waveform of interest. In this case, let's plot the the footprint labeled '002' in the northwest of the CHM.
+Let's take a look at a waveform for a single GEDI shot. We can select a shot by using its `shot_number` as shown below. Note, however, that the example data subset shots have been re-numbered, and those numbers will not correspond with full orbit GEDI data.
 
-```{r extract-wf, warning=F}
+```{r extract-wf, warning=F, cache=TRUE}
 
 # Extracting GEDI full-waveform for a given shot_number
-###ERROR HERE###
 wf <- getLevel1BWF(gedilevel1b,shot_number = 20)
+
+# or, if using a full GEDI dataset,
 # wf <- getLevel1BWF(gedilevel1b,shot_number = level1bgeo_WREF_UTM_buffer$shot_number[which(level1bgeo_WREF_UTM_buffer$shot_number==1786)])
 
 # Save current plotting parameters to revert to
@@ -1468,7 +1479,7 @@ Here, we will use the `byTileAOP()` function from the 'neonUtilities' package to
 if (!file.exists('./data/DP1.30003.001/2017/FullSite/D16/2017_WREF_1/L1/DiscreteLidar/ClassifiedPointCloud/NEON_D16_WREF_DP1_580000_5075000_classified_point_cloud.laz')){
   byTileAOP(dpID = "DP1.30003.001", site = SITECODE, year = 2017, 
           easting = extent(chm)[1], northing=extent(chm)[3], 
-          check.size = F)
+          check.size = F, savepath = './data/') # Edit savepath as needed
 }
 
 ```
@@ -1483,6 +1494,9 @@ lidR::plot(WREF_LAS)
 
 ```
 
+```{r, echo=FALSE}
+knitr::include_graphics('./images/GEDI_AOP1.png')
+```
 Oh, yikes! There are a lot of outliers above the actual forest, and a few below. Let's use some simple statistics to throw out those outliers. We will first calculate the mean and standard deviation for the verical axis, and then use the 'filter' options of the `readLAS()` function to eliminate the vertical outliers.
 
 ```{r plot-lidar-pointcloud-good, eval=FALSE}
@@ -1503,6 +1517,11 @@ WREF_LAS=readLAS("./data/DP1.30003.001/2017/FullSite/D16/2017_WREF_1/L1/Discrete
 plot(WREF_LAS)
 
 ```
+
+```{r, echo=FALSE}
+knitr::include_graphics('./images/GEDI_AOP2.png')
+```
+
 Ahhh, that's better.
 
 ### Clip AOP LiDAR Pointcloud to GEDI footprints
@@ -1519,12 +1538,14 @@ plot(WREF_GEDI_footprints[[8]])
 
 ```
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ERdy6-bqiZI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ### Plot GEDI Waveform with AOP Pointcloud in 3D space
 Now that we can extract individual waveforms, and the AOP LiDAR pointcloud that corresponds with each GEDI waveform, let's see if we can plot them both in 3D space. We already know how to plot the AOP LiDAR points, so let's write a function to draw the GEDI waveform, too, using the `points3d()` function:
 
 ```{r plot-lidar-together-1, eval=FALSE}
 
-for(shot_n in 1:21){
+for(shot_n in c(20)){
 
   # First, plot the NEON AOP LiDAR clipped to the GEDI footprint
   # We save the plot as an object 'p' which gives the (x,y) offset for the lower
@@ -1559,7 +1580,9 @@ for(shot_n in 1:21){
 
 ```
 
-Whoa, it looks like there is a bad vertical mismatch between those two data sources. This is because the two data sources have a different vertical datum. The NEON AOP data are delivered in the GEOID12A, while the GEDI data are delivered in the WGS84 native datum. We will need to convert one to the other to get them to line up correctly.
+<iframe width="560" height="315" src="https://www.youtube.com/embed/DnqbPPVSwTg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+Whoa, it looks like there is a bad vertical mismatch between those two data sources. This is because the two data sources have a different vertical datum. The NEON AOP data are delivered in the GEOID12A datum, while the GEDI data are delivered in the WGS84 native datum. We will need to convert one to the other to get them to line up correctly.
 
 ### Datum, Geoid, and how to best measure the Earth
 We are seeing a vertical mismatch between the NEON and GEDI LiDAR data sources because they are using different standards for measuring the Earth. Here, we will briefly describe the main differences between these two datum models, and then show how to correct for this discrepancy.
@@ -1729,12 +1752,14 @@ for(shot_n in c(20)){
 
 ```
 
+
+
 ### Optional - NEON base plots
 You may also be interested to see if any of the GEDI footprints intersect a NEON base plot, which would allow for a direct comparison of the GEDI waveform with many of the datasets which are collected within the base plots, such as the vegetation structure data product containing height, DBH, and species identification of all trees >10cm DBH. While it is statistically pretty unlikely that a GEDI footprint will intersect with your base plot of interest, it is possible that _some_ GEDI footprint will intersetc with _some_ base plot in your study area, so we may as well take a look:
 
 ```{r import and plot base plots}
 
-setwd("./data/")
+setwd("./data/") # This will depend upon your local environment
 
 # Download the NEON TOS plots polygons directly from the NEON website
 download.file(url="https://data.neonscience.org/api/v0/documents/All_NEON_TOS_Plots_V8", 
@@ -1755,3 +1780,75 @@ plot(chm_WGS)
 plot(base_crop$geometry, border = 'blue', add=T)
 
 ```
+```{r, echo=FALSE}
+knitr::include_graphics('./images/GEDI_AOP3.png')
+```
+## NEON AOP Written Questions:
+
+*Reminder: these questions are largely based on the assigned video lectures.  I highly recommend you watching or re-watching them before tackling these questions.*
+
+1) What is the overlap in the type of data generated by NEON AOP and PhenoCam.  What metrics from PhenoCam could you apply to NEON AOP data, especially once there are >10 years of aerial data?
+
+2) List 4 challenges to timing AOP flight campaigns.
+
+3) When using NEON AOP data, when should you use `byTileAOP` versus `byFileAOP`?  What additional processing might you need to do if you worked with the `byFileAOP` data?
+*Hint: try pulling the data in both formats (this will take a while)*
+
+4) How do the additional bands in NEON AOP improve our contraint of Biodiversity and Ecosystem Structure relative to satelite-derived data?
+
+5) What role do campagins such as NEON AOP play in 'filling the sampling gap' of essential *in situ* data such as FLUXNET (Eddy Co-Variance) data?
+
+6) List 3 attributes of NEON AOP data that are unique to other publicly served data.
+*Hints: Band width? Resolution?  Something else?*
+
+7) Which data product(s) derived from the NEON AOP campaign align with remotely-sensed products from NASA?  
+*Hint: start with vegetation indicies*
+
+## NEON AOP Coding Lab
+
+For the purpose of this coding lab we will evaluate 2 different forested sites in 2018:
+
+1) Guanica (GUAN) in Puerto Rico:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Rz9kgfPgLPo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+2) Bartlett Experimental Forest (BART) in New Hampshire:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/zK4cEEs-8tQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+**1:** How are these two forests similar?  How are they different? *(3-5 sentences)*
+
+**2:** Using this NEON tutorial and the tutorials we've covered in this textbook *(hint: you did half of this workflow in your very first coding lab)* pull the NEON AOP derived Canopy Height Model (CHM, `DP3.30015.001`) and High-resolution orthorectified camera imagery mosaic
+`DP3.30010.001` for each forest and overlay the NEON TOS Woody Vegetation Structure `DP1.10098.001` basal diameter data product to evaluate how well AOP captures trees in each forest.  
+**Generate a labeled 2x2 plot panel including:** 
+
+  * **Each RGB image with basal diameter overlaid**
+  
+  * **Each CHM with basal diameter overlaid**
+  
+*Hints/reminders from section 2.9:*
+```
+<- loadByProduct
+<- getLocTOS
+<- merge
+```
+**Write 2-3 sentences summarizing your findings and thoughts.**
+
+**3:** Use the `byTileAOP` function of the `neonUtilities` package to pull a subset of the descrete LiDAR pointcloud for each forest (*Hint: You can feed `byTileAOP` Easting and Northing from your `Vegetation Structure` dataframe(s)*).  Use the `structural_diversity_metrics` function that you defined in section 5.6 of the textbook to process discrete return LiDAR for each site and generte structural diversity metrics.  
+  
+  * Using `lidR` generate a labeled 2-panel plot of your canopy height model for each forest
+  * Using `lidR` generate a labeled 2-panel plot of a cross-section for each forest
+  * Use section `5.6.3 Comparing Metrics Between Forests` to compare each forest and generate a a clean summary table via `kable`
+  * Using **Table 2** from <a href="https://doi.org/10.3390/rs12091407" target="_blank">LaRue, Wagner, et al. (2020) </a> as a reference, write 1-2 paragraphs summarizing the differences in forest structural diversity between the two forests and how they may relate to your answers to **Question 1**.  
+
+## NEON AOP Culmination Write Up
+
+Write up a 1-page **derived data product or research pipeline proposal** summary of a project that you might want to explore using NEON AOP data. Include the types of NEON (and other data) that you would need to implement this project. Save this summary as you will be refining and adding to your ideas over the course of the semester.  
+
+Sugestions: 
+
+1. Tables or bullet lists of **specific** data products
+
+2. An **overarching high-quality figure** to show how these data align
+
+3. One paragaph summarizing *how* this data or analysis is useful to **you and/or the infrastructure**.
